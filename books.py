@@ -1,6 +1,8 @@
-from fastapi import FastAPI
 from enum import Enum
-from typing import Optional
+from typing import List, Optional,Union
+
+from fastapi import FastAPI
+
 app = FastAPI()
 
 BOOKS = [
@@ -14,89 +16,106 @@ BOOKS = [
 
 
 class DirectionName(str, Enum):
+    """
+    Enumeration of direction names.
+
+    Each direction name represents a specific direction.
+
+    Possible values:
+        - north: North direction.
+        - south: South direction.
+        - east: East direction.
+        - west: West direction.
+    """
     north = "North"
     south = "South"
     east = "East"
     west = "West"
 
 
-# @app.get('/')
-# async def read_all_books():
-    # return BOOKS
-
 @app.get('/')
-async def read_all_books(skip_book: Optional[str] = None):
+async def read_all_books(skip_book: Optional[str] = None) -> List[dict]:
+    """
+    Retrieve all books.
+
+    If `skip_book` is provided, exclude the book with the matching title.
+
+    Args:
+        skip_book (str, optional): The title of the book to skip. Defaults to None.
+
+    Returns:
+        List[dict]: List of books.
+    """
     new_books = BOOKS.copy()
     if skip_book:
-        for each in new_books:
-            if each.get('title') == skip_book:
-                new_books.remove(each)
+        new_books = [book for book in new_books if book['title'] != skip_book]
     return new_books
 
 
-# @app.get("/books/mybook")
-# async def read_favorite_book():
-#     return {"book_title": "My favorite book"}
-
-
-# @app.get("/books/{book_id}")
-# async def read_book(book_id: int):
-#     return {"book_title": book_id}
-
-# @app.get("/directions/{direction_name}")
-# async def get_direction(direction_name: DirectionName):
-#     if direction_name == DirectionName.north:
-#         return {"Direction": direction_name, "sub": "Up"}
-#     elif direction_name == DirectionName.south:
-#         return {"Direction": direction_name, "sub": "Down"}
-#     elif direction_name == DirectionName.west:
-#         return {"Direction": direction_name, "sub": "Left"}
-#     return {"Direction": direction_name, "sub": "Right"}
-
-# @app.get('/{book_name}')
-# async def read_book(book_name: str):
-#     for each in BOOKS:
-#         if each.get('title') == book_name:
-#             return each
-#     return {book_name: "Not Found"}
-
-
 @app.post('/')
-async def create_book(book_title, book_author, category):
-    BOOKS.append(
-        {'title': book_title, 'author': book_author, 'category': category})
+async def create_book(book_title: str, book_author: str, category: str) -> List[dict]:
+    """
+    Create a new book.
+
+    Args:
+        book_title (str): The title of the book.
+        book_author (str): The author of the book.
+        category (str): The category of the book.
+
+    Returns:
+        List[dict]: List of books.
+    """
+    BOOKS.append({'title': book_title, 'author': book_author, 'category': category})
     return BOOKS
 
 
 @app.put('/{title}')
-async def update_book(title, book_author, category):
-    for each in BOOKS:
-        if each.get('title') == title:
-            each['author'] = book_author
-            each['category'] = category
+async def update_book(title: str, book_author: str, category: str) -> List[dict]:
+    """
+    Update an existing book.
+
+    Args:
+        title (str): The title of the book to update.
+        book_author (str): The updated author of the book.
+        category (str): The updated category of the book.
+
+    Returns:
+        List[dict]: List of books.
+    """
+    for book in BOOKS:
+        if book['title'] == title:
+            book['author'] = book_author
+            book['category'] = category
             return BOOKS
     return BOOKS
 
 
 @app.delete('/{title}')
-async def delete_book(title):
-    for each in BOOKS:
-        if each.get('title') == title:
-            BOOKS.remove(each)
+async def delete_book(title: str) -> List[dict]:
+    """
+    Delete a book.
+
+    Args:
+        title (str): The title of the book to delete.
+
+    Returns:
+        List[dict]: List of books.
+    """
+    BOOKS[:] = [book for book in BOOKS if book['title'] != title]
     return BOOKS
 
 
 @app.get('/assignment/')
-async def read_book_assignment(title: str):
-    for each in BOOKS:
-        if each.get('title') == title:
-            return each
-    return f'title {title} not found'
+async def read_book_assignment(title: str) -> Union[dict, str]:
+    """
+    Retrieve a book by title.
 
+    Args:
+        title (str): The title of the book to retrieve.
 
-@app.delete('/assignment/')
-async def delete_book_assignment(title: str):
-    for each in BOOKS:
-        if each.get('title') == title:
-            BOOKS.remove(each)
-    return BOOKS
+    Returns:
+        Union[dict, str]: The book as a dictionary if found, otherwise an error message.
+    """
+    for book in BOOKS:
+        if book['title'] == title:
+            return book
