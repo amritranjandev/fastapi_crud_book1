@@ -33,6 +33,9 @@ class DirectionName(str, Enum):
     west = "West"
 
 
+
+
+
 @app.get('/')
 async def read_all_books(skip_book: Optional[str] = None) -> List[dict]:
     """
@@ -119,3 +122,13 @@ async def read_book_assignment(title: str) -> Union[dict, str]:
     for book in BOOKS:
         if book['title'] == title:
             return book
+
+
+@app.route("/get_names",methods=["GET"])
+async def get_names(get_names=None)->List[str]:
+    """route to get casper
+
+    Returns:
+        str: casper
+    """
+    return ["casper"]
